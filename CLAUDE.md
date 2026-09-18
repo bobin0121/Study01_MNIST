@@ -9,7 +9,7 @@ MNIST 손글씨 숫자 인식기. 같은 CNN을 두 가지 방식으로 제공�
 - **[desktop_version/](desktop_version/)** — PyTorch로 학습하고 Tkinter GUI로 인식한다.
   자세한 내용은 [desktop_version/CLAUDE.md](desktop_version/CLAUDE.md).
 - **[web_version/](web_version/)** — 외부 라이브러리 없이 순수 자바스크립트로 추론한다.
-  GitHub Pages에 그대로 올라간다. 자세한 내용은 [web_version/CLAUDE.md](web_version/CLAUDE.md).
+  GitHub Pages로 배포된다. 자세한 내용은 [web_version/CLAUDE.md](web_version/CLAUDE.md).
 
 모든 코드 주석과 UI 텍스트는 한글로 쓴다.
 
@@ -39,6 +39,13 @@ python make_test_data.py   # 정답 데이터 재생성
 웹 버전은 MNIST 원본 규약대로 경계상자를 자르고 20x20으로 맞춘 뒤 무게중심을
 가운데로 옮긴다. **보통 웹 버전이 더 정확하다.** 기존 파이썬 코드를 수정하지
 않기로 했기 때문에 이 차이는 그대로 둔다.
+
+## 배포
+
+`master`에 푸시하면 [.github/workflows/pages.yml](.github/workflows/pages.yml)이
+`web_version/` 안쪽만 GitHub Pages 사이트 루트에 올린다. 저장소 루트에는
+`index.html`이 없으므로 브랜치 배포를 쓰면 주소에 `/web_version/`이 붙는다.
+빌드 단계는 없고, 워크플로는 파일을 그대로 올리기만 한다.
 
 ## 문서
 

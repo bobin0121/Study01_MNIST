@@ -50,7 +50,7 @@ Study01_MNIST/
     └── model/
         ├── mnist_cnn.bin          # Float32 가중치 (~1.61MB)
         ├── mnist_cnn.json         # 텐서 매니페스트
-        └── test_data.json         # 검증용 픽스처
+        └── test_data.json         # 검증용 픽스처 (gitignore 대상)
 ```
 
 ### 이동 후 실행 경로 주의
@@ -174,9 +174,15 @@ MNIST 테스트셋에서 200장을 골라 `web_version/model/test_data.json`을
 | `preprocessed` | 파이썬 전처리를 거친 28x28 정규화 결과 |
 | `probs` | PyTorch가 계산한 10개 확률 |
 
-파일 크기는 약 1.9MB이며 **저장소에 커밋한다.** torch나 MNIST 없이도
-`test.html`을 열면 바로 검증이 돌고, GitHub Pages에서도 검증 페이지가
-동작한다.
+파일 크기는 약 1.9MB이며 **깃에 넣지 않는다.** 생성물이므로
+`.gitignore`에 `web_version/model/test_data.json`을 등록한다. 검증을
+돌리려면 먼저 `make_test_data.py`를 실행해야 하며(torch와 MNIST 필요),
+GitHub Pages에 올린 `test.html`은 이 파일을 못 찾아 동작하지 않는다.
+검증 페이지는 개발 도구이지 배포 대상이 아니다. 실행법은
+`web_version/CLAUDE.md`에 적는다.
+
+반면 가중치 `mnist_cnn.bin`과 `mnist_cnn.json`은 배포된 앱이 동작하려면
+반드시 있어야 하므로 그대로 커밋한다.
 
 **280x280 그림을 저장하지 않는 이유**: 200장×78,400픽셀은 JSON으로
 약 62MB가 되어 브라우저에서 다루기 무겁다. 대신 양쪽 모두 28x28을

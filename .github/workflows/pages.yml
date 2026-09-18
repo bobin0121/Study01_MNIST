@@ -9,7 +9,7 @@ name: Deploy web_version to Pages
 on:
   push:
     branches: [master]
-  workflow_dispatch:
+  workflow_dispatch:  #수동으로도 돌릴 수 있게함
 
 permissions:
   contents: read
@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   deploy:
+  name: web_version 배포
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -31,7 +32,7 @@ jobs:
       - name: 저장소 내려받기
         uses: actions/checkout@v4
 
-      - name: Pages 설정
+      - name: Pages 설정 읽기
         uses: actions/configure-pages@v5
 
       - name: web_version 폴더만 올리기

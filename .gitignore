@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 data/
 .superpowers/
+web_version/model/test_data.json

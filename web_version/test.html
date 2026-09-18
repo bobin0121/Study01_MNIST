@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>손글씨 인식기 — 검증</title>
+<style>
+  body { font-family: "맑은 고딕", sans-serif; margin: 24px; line-height: 1.6; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 16px; margin-top: 28px; }
+  table { border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #ccc; padding: 4px 10px; text-align: left; }
+  .pass { color: #0a7d23; font-weight: bold; }
+  .fail { color: #c02020; font-weight: bold; }
+  #오류 { color: #c02020; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>손글씨 인식기 검증</h1>
+<p>이 페이지는 개발 도구다. <code>make_test_data.py</code>를 먼저 실행해
+<code>model/test_data.json</code>을 만들어야 동작한다.</p>
+
+<h2>1단계 — 순전파 일치</h2>
+<div id="1단계">실행 중…</div>
+
+<h2>2단계 — 전처리와 전체 정확도</h2>
+<div id="2단계">1단계 완료 후 실행된다.</div>
+
+<div id="오류"></div>
+
+<script type="module">
+import { loadModel } from "./js/model.js";
+
+const 순전파허용오차 = 1e-4;
+
+function 표만들기(행들) {
+  const table = document.createElement("table");
+
+  행들.forEach((행, 행번호) => {
+    const tr = document.createElement("tr");
+    for (const 칸 of 행) {
+      const td = document.createElement(행번호 === 0 ? "th" : "td");
+      td.innerHTML = 칸;
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  });
+
+  return table;
+}
+
+function 판정(통과) {
+  return 통과
+    ? '<span class="pass">통과</span>'
+    : '<span class="fail">실패</span>';
+}
+
+function 최대위치(배열) {
+  let 위치 = 0;
+  for (let i = 1; i < 배열.length; i++) {
+    if (배열[i] > 배열[위치]) 위치 = i;
+  }
+  return 위치;
+}
+
+async function 정답데이터읽기() {
+  const response = await fetch("./model/test_data.json");
+  if (!response.ok) {
+    throw new Error(
+      "model/test_data.json 을 찾을 수 없습니다. " +
+      "desktop_version 폴더에서 make_test_data.py 를 먼저 실행하세요."
+    );
+  }
+  return response.json();
+}
+
+async function 일단계(모델, 데이터) {
+  let 최대오차 = 0;
+  let 예측일치 = 0;
+  const 실패목록 = [];
+
+  for (let i = 0; i < 데이터.items.length; i++) {
+    const 항목 = 데이터.items[i];
+    const 확률 = 모델.predict(Float32Array.from(항목.preprocessed));
+
+    let 오차 = 0;
+    for (let k = 0; k < 10; k++) {
+      오차 = Math.max(오차, Math.abs(확률[k] - 항목.probs[k]));
+    }
+    최대오차 = Math.max(최대오차, 오차);
+
+    const js예측 = 최대위치(확률);
+    const py예측 = 최대위치(항목.probs);
+    if (js예측 === py예측) 예측일치++;
+    else 실패목록.push(`${i}번: JS ${js예측} vs 파이썬 ${py예측}`);
+  }
+
+  const 개수 = 데이터.items.length;
+  const 오차통과 = 최대오차 <= 순전파허용오차;
+  const 예측통과 = 예측일치 === 개수;
+
+  const 영역 = document.getElementById("1단계");
+  영역.innerHTML = "";
+  영역.appendChild(표만들기([
+    ["항목", "기준", "실측", "판정"],
+    ["확률 최대 절대차", `≤ ${순전파허용오차}`, 최대오차.toExponential(2), 판정(오차통과)],
+    ["예측 숫자 일치", `${개수}/${개수}`, `${예측일치}/${개수}`, 판정(예측통과)],
+  ]));
+
+  if (실패목록.length > 0) {
+    const pre = document.createElement("pre");
+    pre.className = "fail";
+    pre.textContent = 실패목록.slice(0, 20).join("\n");
+    영역.appendChild(pre);
+  }
+
+  return 오차통과 && 예측통과;
+}
+
+async function 실행() {
+  try {
+    const [모델, 데이터] = await Promise.all([
+      loadModel("./model"),
+      정답데이터읽기(),
+    ]);
+    await 일단계(모델, 데이터);
+  } catch (error) {
+    document.getElementById("오류").textContent = error.message;
+    document.getElementById("1단계").innerHTML = 판정(false);
+  }
+}
+
+실행();
+</script>
+</body>
+</html>

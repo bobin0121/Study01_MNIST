@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   deploy:
-  name: web_version 배포
+    name: web_version 배포
     runs-on: ubuntu-latest
     environment:
       name: github-pages

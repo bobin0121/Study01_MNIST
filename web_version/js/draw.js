@@ -28,6 +28,10 @@ export function createBoard(canvas) {
   ctx.lineJoin = "round";
 
   canvas.addEventListener("pointerdown", (event) => {
+    // 이미 한 손가락(포인터)으로 그리는 중이면 새 포인터는 무시한다.
+    // 그러지 않으면 beginPath가 다시 호출되어 두 획이 이어져 보인다.
+    if (그리는중) return;
+
     그리는중 = true;
     canvas.setPointerCapture(event.pointerId);
 

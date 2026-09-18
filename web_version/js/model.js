@@ -49,6 +49,43 @@ export async function loadModel(basePath) {
     );
   }
 
+  // forward()가 실제로 기대하는 shape. 위 상수들로부터 계산해서
+  // 상수 하나를 바꾸면 이 표와 forward가 함께 바뀌도록 한다.
+  const 기대shape = {
+    "conv1.weight": [CONV1_출력, 1, 3, 3],
+    "conv1.bias": [CONV1_출력],
+    "conv2.weight": [CONV2_출력, CONV1_출력, 3, 3],
+    "conv2.bias": [CONV2_출력],
+    "fc1.weight": [FC1_출력, CONV2_출력 * (입력한변 / 4) * (입력한변 / 4)],
+    "fc1.bias": [FC1_출력],
+    "fc2.weight": [분류개수, FC1_출력],
+    "fc2.bias": [분류개수],
+  };
+
+  const manifest텐서 = {};
+  for (const entry of manifest.tensors) {
+    manifest텐서[entry.name] = entry;
+  }
+
+  for (const [이름, shape] of Object.entries(기대shape)) {
+    const entry = manifest텐서[이름];
+    if (!entry) {
+      throw new Error(`매니페스트에 텐서가 없습니다: ${이름}`);
+    }
+    const 실제shape = entry.shape;
+    const 일치 =
+      Array.isArray(실제shape) &&
+      실제shape.length === shape.length &&
+      실제shape.every((v, i) => v === shape[i]);
+
+    if (!일치) {
+      throw new Error(
+        `텐서 shape가 맞지 않습니다: ${이름} — 기대 [${shape.join(",")}], ` +
+        `실제 [${(실제shape || []).join(",")}]`
+      );
+    }
+  }
+
   const tensors = {};
   for (const entry of manifest.tensors) {
     tensors[entry.name] = new Float32Array(buffer, entry.offset, entry.count);

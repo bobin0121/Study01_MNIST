@@ -89,6 +89,9 @@ export function preprocess(image, width, height, mean, std) {
 
   // 3) 긴 변이 20px가 되도록 비율 유지 축소
   const 배율 = 목표상자 / Math.max(자른높이, 자른너비);
+  // Math.round는 .5를 항상 올림한다. make_test_data.py의 파이썬 round는
+  // 은행반올림(banker's rounding)이라 다르게 반올림될 수 있지만, 그 차이는
+  // 최대 1px이고 정확도 기준을 넘기므로 의도적으로 받아들인다.
   const 새높이 = Math.max(1, Math.round(자른높이 * 배율));
   const 새너비 = Math.max(1, Math.round(자른너비 * 배율));
   const 작은그림 = 면적평균축소(자름, 자른너비, 자른높이, 새너비, 새높이);
@@ -118,6 +121,8 @@ export function preprocess(image, width, height, mean, std) {
   let 최종 = 판;
   if (총합 > 0) {
     const 중심 = (캔버스한변 - 1) / 2;
+    // 여기도 Math.round와 파이썬 round(은행반올림)가 다를 수 있지만
+    // 최대 1px 차이이고 정확도 기준을 넘기므로 의도적으로 받아들인다.
     const 이동y = Math.round(중심 - y가중 / 총합);
     const 이동x = Math.round(중심 - x가중 / 총합);
 

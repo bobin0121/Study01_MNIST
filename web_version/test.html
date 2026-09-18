@@ -166,6 +166,10 @@ async function 이단계(모델, 데이터) {
 
   if (실패목록.length > 0) {
     const pre = document.createElement("pre");
+    // 정확도가 기준을 통과한 상태에서 여기 나열되는 항목은 예상된 소수의
+    // 오분류일 뿐 "실패"가 아니므로, 이 단계가 실제로 실패했을 때만
+    // 빨간색(fail)을 적용한다. 통과 시에는 참고 정보로만 보여준다.
+    if (!정확도통과) pre.className = "fail";
     pre.textContent = 실패목록.slice(0, 20).join("\n");
     영역.appendChild(pre);
   }

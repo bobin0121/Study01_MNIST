@@ -49,6 +49,8 @@ python make_test_data.py   # 정답 데이터 재생성
 
 ## 문서
 
+- `CLAUDE_전역.md` — 이 컴퓨터의 전역 지침(`~/.claude/CLAUDE.md`)을 복사한 스냅샷이다.
+  이름이 달라 세션에 자동으로 읽히지 않는 참고용 사본이며, 실제로 적용되는 것은 원본 쪽이다.
 - 설계: [docs/superpowers/specs/2026-09-18-web-desktop-split-design.md](docs/superpowers/specs/2026-09-18-web-desktop-split-design.md)
 - 구현 계획: [docs/superpowers/plans/2026-09-18-web-desktop-split.md](docs/superpowers/plans/2026-09-18-web-desktop-split.md)
 

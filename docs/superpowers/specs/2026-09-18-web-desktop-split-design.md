@@ -92,7 +92,7 @@ Study01_MNIST/
 `train.py`의 `transforms.Normalize`와 `predict_gui.py` 안에 각각
 하드코딩되어 있고, 두 파일은 수정하지 않는다. 따라서
 `export_weights.py`가 상수를 모듈 상수로 보유하고 매니페스트에 기록한다.
-자바스크립트 쪽에는 값이 전혀 적힐지 않으며, 이 상수가 `train.py`와
+자바스크립트 쪽에는 값이 전혀 적히지 않으며, 이 상수가 `train.py`와
 일치해야 한다는 점을 `desktop_version/CLAUDE.md`에 명시한다.
 
 `fc1.weight`는 PyTorch `Linear` 규약대로 `(out, in)` 순서이며, 입력

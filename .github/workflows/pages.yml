@@ -1,0 +1,44 @@
+# web_version/ 폴더만 GitHub Pages로 배포하는 워크플로
+#
+# 저장소 루트에는 index.html이 없고 web_version/ 안에 있다.
+# 브랜치 배포(legacy)를 쓰면 주소가 .../Study01_MNIST/web_version/ 이 되므로,
+# 이 워크플로로 web_version/ 안쪽만 사이트 루트에 올려 주소를 짧게 만든다.
+
+name: Deploy web_version to Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포가 겹치지 않게 한 번에 하나씩만 실행한다
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 저장소 내려받기
+        uses: actions/checkout@v4
+
+      - name: Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: web_version 폴더만 올리기
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web_version
+
+      - name: 배포
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -29,8 +29,11 @@
 
 <script type="module">
 import { loadModel } from "./js/model.js";
+import { upscaleNearest, preprocess } from "./js/preprocess.js";
 
 const 순전파허용오차 = 1e-4;
+const 정확도기준 = 0.97;
+const 확대배율 = 10;
 
 function 표만들기(행들) {
   const table = document.createElement("table");
@@ -116,13 +119,73 @@ async function 일단계(모델, 데이터) {
   return 오차통과 && 예측통과;
 }
 
+async function 이단계(모델, 데이터) {
+  let 최대전처리오차 = 0;
+  let 맞힌개수 = 0;
+  const 실패목록 = [];
+
+  for (let i = 0; i < 데이터.items.length; i++) {
+    const 항목 = 데이터.items[i];
+
+    const 큰그림 = upscaleNearest(항목.pixels, 28, 확대배율);
+    const 처리됨 = preprocess(큰그림, 280, 280, 모델.normalize.mean, 모델.normalize.std);
+
+    if (처리됨 === null) {
+      실패목록.push(`${i}번: 전처리가 null을 돌려줌`);
+      continue;
+    }
+
+    for (let k = 0; k < 784; k++) {
+      최대전처리오차 = Math.max(최대전처리오차, Math.abs(처리됨[k] - 항목.preprocessed[k]));
+    }
+
+    const 확률 = 모델.predict(처리됨);
+    const 예측 = 최대위치(확률);
+    if (예측 === 항목.label) 맞힌개수++;
+    else 실패목록.push(`${i}번: 예측 ${예측}, 정답 ${항목.label}`);
+  }
+
+  const 개수 = 데이터.items.length;
+  const 정확도 = 맞힌개수 / 개수;
+  const 정확도통과 = 정확도 >= 정확도기준;
+
+  const 영역 = document.getElementById("2단계");
+  영역.innerHTML = "";
+  영역.appendChild(표만들기([
+    ["항목", "기준", "실측", "판정"],
+    ["전체 정확도", `≥ ${(정확도기준 * 100).toFixed(0)}%`,
+     `${(정확도 * 100).toFixed(1)}% (${맞힌개수}/${개수})`, 판정(정확도통과)],
+    ["전처리 최대 오차", "참고용 (기준 없음)", 최대전처리오차.toExponential(2), "—"],
+  ]));
+
+  const 설명 = document.createElement("p");
+  설명.textContent =
+    "전처리는 픽셀 단위 일치를 요구하지 않는다. 파이썬과 브라우저의 " +
+    "리샘플링 구현이 다르기 때문이며, 판단 기준은 전체 정확도다.";
+  영역.appendChild(설명);
+
+  if (실패목록.length > 0) {
+    const pre = document.createElement("pre");
+    pre.textContent = 실패목록.slice(0, 20).join("\n");
+    영역.appendChild(pre);
+  }
+
+  return 정확도통과;
+}
+
 async function 실행() {
   try {
     const [모델, 데이터] = await Promise.all([
       loadModel("./model"),
       정답데이터읽기(),
     ]);
+
+    if (!데이터.count || !데이터.items || 데이터.items.length === 0) {
+      throw new Error("정답 데이터(model/test_data.json)에 항목이 없습니다.");
+    }
+
     await 일단계(모델, 데이터);
+    await 이단계(모델, 데이터);
   } catch (error) {
     document.getElementById("오류").textContent = error.message;
     document.getElementById("1단계").innerHTML = 판정(false);

@@ -35,15 +35,34 @@ python make_test_data.py
 
 ## 배포
 
-GitHub Pages는 브랜치 배포에서 루트 또는 `/docs`만 고를 수 있다. 루트 배포를
-쓰며, 주소는 다음과 같다.
+**GitHub Actions 방식으로 이 폴더만 사이트 루트에 올린다.**
+주소는 다음과 같다.
 
 ```
-https://<사용자>.github.io/Study01_MNIST/web_version/
+https://<사용자>.github.io/Study01_MNIST/
 ```
 
-모든 경로가 상대 경로라 설정 파일이 필요 없다. `test.html`은 픽스처가 깃에
-없어 배포본에서 동작하지 않는다. 검증 페이지는 개발 도구이지 배포 대상이 아니다.
+브랜치 배포(Deploy from a branch)를 쓰지 **않는** 이유는, 그 방식은 소스
+폴더로 루트 또는 `/docs`만 고를 수 있기 때문이다. 이 저장소는 루트에
+`index.html`이 없고 `web_version/` 안에 있어서, 루트 배포를 쓰면 주소가
+`.../Study01_MNIST/web_version/`으로 길어진다.
+
+배포는 `.github/workflows/pages.yml`이 담당하며, `master`에 푸시할 때마다
+`web_version/` 안쪽만 올린다. 빌드 단계는 여전히 없다 — 워크플로는 파일을
+그대로 올리기만 한다. 모든 경로가 상대 경로라 사이트 루트가 바뀜어도
+그대로 동작한다.
+
+현재 설정을 확인하려면:
+
+```
+gh api repos/<사용자>/Study01_MNIST/pages --jq '{build_type, html_url}'
+```
+
+`build_type`이 `workflow`여야 한다. `legacy`로 나오면 아직 브랜치 방식이라
+주소가 달라진다.
+
+`test.html`은 픽스처가 깃에 없어 배포본에서 동작하지 않는다. 검증 페이지는
+개발 도구이지 배포 대상이 아니다.
 
 ## 파일별 책임
 

@@ -1,36 +1,56 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+이 파일은 Claude Code가 이 저장소에서 작업할 때 참고할 지침이다.
 
-## Project overview
+## 개요
 
-A small PyTorch project that trains a CNN on MNIST and lets a user hand-draw a digit in a Tkinter canvas for live recognition. All code comments and UI text are written in Korean.
+MNIST 손글씨 숫자 인식기. 같은 CNN을 두 가지 방식으로 제공한다.
 
-## Commands
+- **[desktop_version/](desktop_version/)** — PyTorch로 학습하고 Tkinter GUI로 인식한다.
+  자세한 내용은 [desktop_version/CLAUDE.md](desktop_version/CLAUDE.md).
+- **[web_version/](web_version/)** — 외부 라이브러리 없이 순수 자바스크립트로 추론한다.
+  GitHub Pages에 그대로 올라간다. 자세한 내용은 [web_version/CLAUDE.md](web_version/CLAUDE.md).
 
-Python 3.11 is required. On this machine it lives at `C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe` (the bare `python`/`python3` on PATH may resolve to the Microsoft Store stub in some shells — if so, invoke the full path or restart the shell so the installed Python's PATH entry takes effect).
+모든 코드 주석과 UI 텍스트는 한글로 쓴다.
 
-Install dependencies:
+## 두 버전이 함께 지켜야 하는 것
+
+- **모델 구조** — conv(1→32) → pool → conv(32→64) → pool → fc(3136→128) → fc(128→10),
+  입력은 28x28 단일 채널. 정의는 `desktop_version/model.py` 한 곳뿐이고,
+  웹은 `web_version/js/model.js`에서 이를 재현한다.
+- **정규화 상수** — 평균 `0.1307`, 표준편차 `0.3081`. 자바스크립트는 이 값을
+  코드에 적지 않고 `web_version/model/mnist_cnn.json`에서 읽는다.
+- **입력 형식** — 28x28 단일 채널, 검은 배경에 흰 글씨.
+
+**모델 구조를 바꾸면** 반드시 이 순서를 지킨다:
+
 ```
-python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-python -m pip install pillow numpy
+cd desktop_version
+python train.py            # 재학습 -> mnist_cnn.pt
+python export_weights.py   # 재내보내기 -> web_version/model/
+python make_test_data.py   # 정답 데이터 재생성
 ```
 
-Train the model (downloads MNIST into `./data` on first run, trains 5 epochs, saves weights to `mnist_cnn.pt`):
-```
-python train.py
-```
+그러지 않으면 웹 버전이 shape 불일치로 실패한다.
 
-Run the handwriting recognition GUI (requires `mnist_cnn.pt` to already exist):
-```
-python predict_gui.py
-```
+## 두 버전의 답이 다를 수 있다
 
-There is no test suite, linter, or build step in this project.
+의도된 차이다. `predict_gui.py`는 280x280 캔버스를 그대로 28x28로 축소할 뿐이고,
+웹 버전은 MNIST 원본 규약대로 경계상자를 자르고 20x20으로 맞춘 뒤 무게중심을
+가운데로 옮긴다. **보통 웹 버전이 더 정확하다.** 기존 파이썬 코드를 수정하지
+않기로 했기 때문에 이 차이는 그대로 둔다.
 
-## Architecture
+## 문서
 
-- [model.py](model.py) — `MnistCNN`: the only model definition, shared by both `train.py` and `predict_gui.py`. Architecture is fixed at conv(1→32)→pool→conv(32→64)→pool→dropout→fc(3136→128)→dropout→fc(128→10), assuming 28x28 single-channel input. Changing this architecture requires re-running `train.py` to regenerate `mnist_cnn.pt`, since the GUI loads weights via `load_state_dict` and will fail on shape mismatches.
-- [train.py](train.py) — Loads MNIST via `torchvision.datasets.MNIST` (normalized with the standard MNIST mean/std `0.1307`/`0.3081`), trains `MnistCNN`, evaluates test accuracy after every epoch, and writes weights to `mnist_cnn.pt` via `torch.save(model.state_dict(), ...)`. Hyperparameters (`BATCH_SIZE`, `EPOCHS`, `LEARNING_RATE`, `WEIGHT_PATH`) are module-level constants at the top of the file.
-- [predict_gui.py](predict_gui.py) — Tkinter app (`DigitRecognizerApp`) with a 280x280 black drawing canvas. Mouse drag events are painted both onto the visible Tkinter canvas and in parallel onto an in-memory PIL image (`self.image`), which is the actual data fed to the model. On "인식하기" (predict), the PIL image is downsampled to 28x28, normalized with the same mean/std used in training, and run through `MnistCNN` to produce a predicted digit and confidence. The normalization constants here must stay in sync with `train.py`'s — they are duplicated, not shared.
-- `data/` and `__pycache__/` are generated artifacts (downloaded MNIST files and compiled bytecode); do not hand-edit or expect them to be portable.
+- 설계: [docs/superpowers/specs/2026-09-18-web-desktop-split-design.md](docs/superpowers/specs/2026-09-18-web-desktop-split-design.md)
+- 구현 계획: [docs/superpowers/plans/2026-09-18-web-desktop-split.md](docs/superpowers/plans/2026-09-18-web-desktop-split.md)
+
+## 생성물
+
+`desktop_version/data/`, `__pycache__/`, `web_version/model/test_data.json`은
+생성물이라 깃에 없다. 손으로 고치지 않는다.
+
+반면 `web_version/model/mnist_cnn.bin`과 `mnist_cnn.json`은 배포된 앱이
+동작하려면 반드시 있어야 하므로 커밋한다. 빌드 단계가 없기 때문이다.
+
+테스트 스위트, 린터, 빌드 도구는 없다. 검증은 `web_version/test.html`로 한다.

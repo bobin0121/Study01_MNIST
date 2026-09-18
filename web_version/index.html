@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>손글씨 숫자 인식기</title>
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<main>
+  <h1>손글씨 숫자 인식기</h1>
+  <p class="안내">아래 칸에 숫자 하나를 크게 그린 뒤 "인식하기"를 누르세요.</p>
+
+  <canvas id="그림판" width="280" height="280"></canvas>
+
+  <div class="버튼줄">
+    <button id="인식">인식하기</button>
+    <button id="지우기">지우기</button>
+  </div>
+
+  <p id="결과">모델을 불러오는 중…</p>
+
+  <section id="확률표" hidden>
+    <h2>숫자별 확률</h2>
+    <div id="막대들"></div>
+  </section>
+</main>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

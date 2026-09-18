@@ -20,6 +20,20 @@ export function upscaleNearest(pixels, size, factor) {
   return out;
 }
 
+// 파이썬 round와 같은 규칙으로 반올림한다.
+// 자바스크립트 기본 반올림은 .5를 항상 올리지만, 파이썬 round는 은행반올림이라
+// .5를 짝수 쪽으로 보낸다. 검증데이터만들기.py의 전처리를 그대로 옮기는 것이
+// 이 파일의 목적이므로 그 규칙을 맞춘다.
+function 파이썬반올림(값) {
+  const 내림 = Math.floor(값);
+  const 나머지 = 값 - 내림;
+
+  if (나머지 > 0.5) return 내림 + 1;
+  if (나머지 < 0.5) return 내림;
+
+  return 내림 % 2 === 0 ? 내림 : 내림 + 1;
+}
+
 // 면적 평균 축소. 출력 픽셀이 덮는 원본 영역을 실수 구간으로 잡고
 // 겹치는 넓이를 가중치로 평균낸다. 검증데이터만들기.py와 같은 식이다.
 function 면적평균축소(src, srcW, srcH, outW, outH) {
@@ -89,11 +103,8 @@ export function preprocess(image, width, height, mean, std) {
 
   // 3) 긴 변이 20px가 되도록 비율 유지 축소
   const 배율 = 목표상자 / Math.max(자른높이, 자른너비);
-  // Math.round는 .5를 항상 올림한다. 검증데이터만들기.py의 파이썬 round는
-  // 은행반올림(banker's rounding)이라 다르게 반올림될 수 있지만, 그 차이는
-  // 최대 1px이고 정확도 기준을 넘기므로 의도적으로 받아들인다.
-  const 새높이 = Math.max(1, Math.round(자른높이 * 배율));
-  const 새너비 = Math.max(1, Math.round(자른너비 * 배율));
+  const 새높이 = Math.max(1, 파이썬반올림(자른높이 * 배율));
+  const 새너비 = Math.max(1, 파이썬반올림(자른너비 * 배율));
   const 작은그림 = 면적평균축소(자름, 자른너비, 자른높이, 새너비, 새높이);
 
   // 4) 경계상자 기준으로 가운데 놓기
@@ -121,10 +132,8 @@ export function preprocess(image, width, height, mean, std) {
   let 최종 = 판;
   if (총합 > 0) {
     const 중심 = (캔버스한변 - 1) / 2;
-    // 여기도 Math.round와 파이썬 round(은행반올림)가 다를 수 있지만
-    // 최대 1px 차이이고 정확도 기준을 넘기므로 의도적으로 받아들인다.
-    const 이동y = Math.round(중심 - y가중 / 총합);
-    const 이동x = Math.round(중심 - x가중 / 총합);
+    const 이동y = 파이썬반올림(중심 - y가중 / 총합);
+    const 이동x = 파이썬반올림(중심 - x가중 / 총합);
 
     최종 = new Float64Array(캔버스한변 * 캔버스한변);
     for (let y = 0; y < 캔버스한변; y++) {

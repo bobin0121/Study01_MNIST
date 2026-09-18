@@ -25,8 +25,8 @@ from torchvision import datasets
 from model import MnistCNN
 
 WEIGHT_PATH = "mnist_cnn.pt"
-MANIFEST_PATH = os.path.join("..", "web_version", "model", "mnist_cnn.json")
-OUT_PATH = os.path.join("..", "web_version", "model", "test_data.json")
+MANIFEST_PATH = os.path.join("..", "web_version", "가중치정보.json")
+OUT_PATH = os.path.join("..", "web_version", "검증데이터.json")
 
 SAMPLE_COUNT = 200
 UPSCALE = 10          # 28 * 10 = 280, 앱 캔버스와 같은 크기

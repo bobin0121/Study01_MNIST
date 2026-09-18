@@ -17,9 +17,9 @@ MNIST 손글씨 숫자 인식기. 같은 CNN을 두 가지 방식으로 제공�
 
 - **모델 구조** — conv(1→32) → pool → conv(32→64) → pool → fc(3136→128) → fc(128→10),
   입력은 28x28 단일 채널. 정의는 `desktop_version/model.py` 한 곳뿐이고,
-  웹은 `web_version/js/model.js`에서 이를 재현한다.
+  웹은 `web_version/모델.js`에서 이를 재현한다.
 - **정규화 상수** — 평균 `0.1307`, 표준편차 `0.3081`. 자바스크립트는 이 값을
-  코드에 적지 않고 `web_version/model/mnist_cnn.json`에서 읽는다.
+  코드에 적지 않고 `web_version/가중치정보.json`에서 읽는다.
 - **입력 형식** — 28x28 단일 채널, 검은 배경에 흰 글씨.
 
 **모델 구조를 바꾸면** 반드시 이 순서를 지킨다:
@@ -27,8 +27,8 @@ MNIST 손글씨 숫자 인식기. 같은 CNN을 두 가지 방식으로 제공�
 ```
 cd desktop_version
 python train.py            # 재학습 -> mnist_cnn.pt
-python export_weights.py   # 재내보내기 -> web_version/model/
-python make_test_data.py   # 정답 데이터 재생성
+python 가중치내보내기.py   # 재내보내기 -> web_version/
+python 검증데이터만들기.py   # 정답 데이터 재생성
 ```
 
 그러지 않으면 웹 버전이 shape 불일치로 실패한다.
@@ -56,10 +56,10 @@ python make_test_data.py   # 정답 데이터 재생성
 
 ## 생성물
 
-`desktop_version/data/`, `__pycache__/`, `web_version/model/test_data.json`은
+`desktop_version/data/`, `__pycache__/`, `web_version/검증데이터.json`은
 생성물이라 깃에 없다. 손으로 고치지 않는다.
 
-반면 `web_version/model/mnist_cnn.bin`과 `mnist_cnn.json`은 배포된 앱이
+반면 `web_version/가중치.bin`과 `가중치정보.json`은 배포된 앱이
 동작하려면 반드시 있어야 하므로 커밋한다. 빌드 단계가 없기 때문이다.
 
-테스트 스위트, 린터, 빌드 도구는 없다. 검증은 `web_version/test.html`로 한다.
+테스트 스위트, 린터, 빌드 도구는 없다. 검증은 `web_version/검증.html`로 한다.

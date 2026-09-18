@@ -1,8 +1,8 @@
 // 그림판, 전처리, 모델을 연결하고 결과를 화면에 그린다.
 
-import { createBoard } from "./draw.js";
-import { preprocess } from "./preprocess.js";
-import { loadModel } from "./model.js";
+import { createBoard } from "./그림판.js";
+import { preprocess } from "./전처리.js";
+import { loadModel } from "./모델.js";
 
 const 강조개수 = 3;   // 상위 몇 개를 강조할지
 
@@ -86,7 +86,7 @@ function 지우기() {
 인식버튼.addEventListener("click", 인식하기);
 지우기버튼.addEventListener("click", 지우기);
 
-loadModel("./model")
+loadModel(".")
   .then((준비된모델) => {
     모델 = 준비된모델;
     인식버튼.disabled = false;

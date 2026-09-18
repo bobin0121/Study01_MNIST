@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 data/
 .superpowers/
-web_version/model/test_data.json
+web_version/검증데이터.json

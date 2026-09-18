@@ -1,7 +1,7 @@
 // 내보낸 가중치를 불러와 model.py의 forward와 같은 순서로 순전파한다.
 // 드롭아웃은 예측 시 아무 일도 하지 않으므로 구현하지 않는다.
 
-import { conv2d, relu, maxPool2d, linear, softmax } from "./nn.js";
+import { conv2d, relu, maxPool2d, linear, softmax } from "./연산.js";
 
 // model.py의 구조에서 오는 고정값
 const 입력한변 = 28;
@@ -29,15 +29,15 @@ export function forward(tensors, input) {
   return softmax(x);
 }
 
-// basePath 아래의 mnist_cnn.json / mnist_cnn.bin을 읽어 모델을 준비한다.
+// basePath 아래의 가중치정보.json / 가중치.bin을 읽어 모델을 준비한다.
 export async function loadModel(basePath) {
-  const 매니페스트응답 = await fetch(`${basePath}/mnist_cnn.json`);
+  const 매니페스트응답 = await fetch(`${basePath}/가중치정보.json`);
   if (!매니페스트응답.ok) {
     throw new Error(`매니페스트를 불러오지 못했습니다 (${매니페스트응답.status}).`);
   }
   const manifest = await 매니페스트응답.json();
 
-  const 가중치응답 = await fetch(`${basePath}/mnist_cnn.bin`);
+  const 가중치응답 = await fetch(`${basePath}/가중치.bin`);
   if (!가중치응답.ok) {
     throw new Error(`가중치 파일을 불러오지 못했습니다 (${가중치응답.status}).`);
   }

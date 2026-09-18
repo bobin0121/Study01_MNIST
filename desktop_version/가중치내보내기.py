@@ -12,9 +12,9 @@ import numpy as np
 import torch
 
 WEIGHT_PATH = "mnist_cnn.pt"
-OUT_DIR = os.path.join("..", "web_version", "model")
-BIN_NAME = "mnist_cnn.bin"
-JSON_NAME = "mnist_cnn.json"
+OUT_DIR = os.path.join("..", "web_version")
+BIN_NAME = "가중치.bin"
+JSON_NAME = "가중치정보.json"
 
 # train.py의 transforms.Normalize 인자와 반드시 일치해야 한다.
 # 자바스크립트는 이 값을 코드에 적지 않고 매니페스트에서 읽어 쓴다.

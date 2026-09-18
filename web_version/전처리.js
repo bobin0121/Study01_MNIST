@@ -1,5 +1,5 @@
 // 그려진 그림을 MNIST 규약에 맞춘 28x28 정규화 배열로 바꾼다.
-// 이 파일에는 정규화 상수를 적지 않는다. mnist_cnn.json에서 읽어 인자로 받는다.
+// 이 파일에는 정규화 상수를 적지 않는다. 가중치정보.json에서 읽어 인자로 받는다.
 
 const 캔버스한변 = 28;      // 최종 출력 한 변
 const 목표상자 = 20;        // 숫자를 담을 정사각형 한 변 (MNIST 원본 규약)
@@ -21,7 +21,7 @@ export function upscaleNearest(pixels, size, factor) {
 }
 
 // 면적 평균 축소. 출력 픽셀이 덮는 원본 영역을 실수 구간으로 잡고
-// 겹치는 넓이를 가중치로 평균낸다. make_test_data.py와 같은 식이다.
+// 겹치는 넓이를 가중치로 평균낸다. 검증데이터만들기.py와 같은 식이다.
 function 면적평균축소(src, srcW, srcH, outW, outH) {
   const out = new Float64Array(outW * outH);
 
@@ -89,7 +89,7 @@ export function preprocess(image, width, height, mean, std) {
 
   // 3) 긴 변이 20px가 되도록 비율 유지 축소
   const 배율 = 목표상자 / Math.max(자른높이, 자른너비);
-  // Math.round는 .5를 항상 올림한다. make_test_data.py의 파이썬 round는
+  // Math.round는 .5를 항상 올림한다. 검증데이터만들기.py의 파이썬 round는
   // 은행반올림(banker's rounding)이라 다르게 반올림될 수 있지만, 그 차이는
   // 최대 1px이고 정확도 기준을 넘기므로 의도적으로 받아들인다.
   const 새높이 = Math.max(1, Math.round(자른높이 * 배율));

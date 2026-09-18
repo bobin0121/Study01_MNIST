@@ -33,14 +33,14 @@ GUI 실행 (`mnist_cnn.pt`가 이미 있어야 함):
 python predict_gui.py
 ```
 
-웹 버전용 가중치 내보내기 (`../web_version/model/`에 씀):
+웹 버전용 가중치 내보내기 (`../web_version/`에 씀):
 ```
-python export_weights.py
+python 가중치내보내기.py
 ```
 
-웹 버전 검증용 정답 데이터 생성 (`../web_version/model/test_data.json`, 깃에 넣지 않음):
+웹 버전 검증용 정답 데이터 생성 (`../web_version/검증데이터.json`, 깃에 넣지 않음):
 ```
-python make_test_data.py
+python 검증데이터만들기.py
 ```
 
 테스트 스위트, 린터, 빌드 단계는 없다.
@@ -53,7 +53,7 @@ python make_test_data.py
 |---|---|
 | `train.py` | `transforms.Normalize((0.1307,), (0.3081,))` |
 | `predict_gui.py` | `(tensor - 0.1307) / 0.3081` 직접 연산 |
-| `export_weights.py` | 모듈 상수 `MEAN` / `STD` |
+| `가중치내보내기.py` | 모듈 상수 `MEAN` / `STD` |
 
 앞의 둘은 기존 코드라 **의도적으로 수정하지 않았다.** 셋째는 새로
 추가한 것이고, 이 값이 매니페스트를 통해 자바스크립트로 전달된다.
@@ -66,7 +66,7 @@ python make_test_data.py
 - `model.py` — `MnistCNN`. 이 저장소의 유일한 모델 정의이며 웹 버전도 이
   구조를 그대로 재현한다. conv(1→32)→pool→conv(32→64)→pool→dropout→
   fc(3136→128)→dropout→fc(128→10), 입력은 28x28 단일 채널.
-  **이 구조를 바꾸면** `train.py`로 재학습하고 `export_weights.py`를 다시
+  **이 구조를 바꾸면** `train.py`로 재학습하고 `가중치내보내기.py`를 다시
   실행해야 한다. 그러지 않으면 웹 버전이 shape 불일치로 실패한다.
 - `train.py` — `torchvision.datasets.MNIST`로 데이터를 받아 평균 `0.1307` /
   표준편차 `0.3081`로 정규화해 학습하고, 에폭마다 테스트 정확도를 평가한
@@ -83,7 +83,7 @@ python make_test_data.py
   그리기를 고칠 때 한쪽만 고치면 화면과 인식 결과가 조용히 어긋난다.
   지우기도 둘 다 지워야 한다(`canvas.delete` + `draw.rectangle`).
 
-  펜 굵기는 `PEN_WIDTH = 18`로 고정이다. 웹 버전의 `js/draw.js`도 같은 18을
+  펜 굵기는 `PEN_WIDTH = 18`로 고정이다. 웹 버전의 `그림판.js`도 같은 18을
   쓴다 — 한쪽을 바꾸면 두 버전의 획 굵기가 달라진다.
 
   예측할 때는 PIL 이미지를 28x28로 **단순 축소**(`Image.LANCZOS`)할 뿐, 경계상자 정렬이나
@@ -92,11 +92,11 @@ python make_test_data.py
 
   가중치는 `load_state_dict`로 읽으므로 `model.py` 구조가 바뀐 채 재학습하지
   않으면 shape 불일치로 실패한다.
-- `export_weights.py` — `mnist_cnn.pt`를 웹용 Float32 바이너리와 매니페스트로
+- `가중치내보내기.py` — `mnist_cnn.pt`를 웹용 Float32 바이너리와 매니페스트로
   내보낸다. **정규화 상수 `MEAN`/`STD`를 모듈 상수로 들고 있으며, 이 값은
   `train.py`의 `transforms.Normalize` 인자와 반드시 일치해야 한다.**
   자바스크립트는 이 상수를 코드에 적지 않고 매니페스트에서 읽는다.
-- `make_test_data.py` — 웹 검증용 정답 데이터를 만든다. 파이썬 기준 전처리
+- `검증데이터만들기.py` — 웹 검증용 정답 데이터를 만든다. 파이썬 기준 전처리
   구현이 이 파일 안에 들어 있는데, 오직 자바스크립트가 맞출 기준을 만들기
   위한 것이며 `predict_gui.py`는 사용하지 않는다.
 - `data/`, `__pycache__/` — 생성물. 손대지 않는다.
